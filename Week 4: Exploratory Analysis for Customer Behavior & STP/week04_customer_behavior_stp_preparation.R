@@ -1,116 +1,105 @@
 ############################################################
 # Marketing Analytics
-# Week 4: Exploratory Analysis for Customer Behavior and STP
+# Week 4: Exploratory Analysis for Customer Behavior & STP
 #
 # Purpose of this script:
-# This script helps students explore customer behavior,
-# understand customer heterogeneity, connect the findings
-# to the STP framework, and prepare data for segmentation.
+# This script explores customer behavioral patterns and
+# prepares data for segmentation analysis.
 #
 # Students will learn how to:
-# 1. Explore behavioral differences across customers
+# 1. Explore behavioral customer data
 # 2. Identify customer heterogeneity
-# 3. Connect data patterns to Segmentation, Targeting,
-#    and Positioning (STP)
-# 4. Prepare variables for segmentation analysis
+# 3. Connect findings to the STP framework
+# 4. Prepare variables for segmentation
 ############################################################
 
 
-############################################################
-# 1. Load Required Packages
-############################################################
 
-# Install packages if needed
-# install.packages("tidyverse")
+############################################################
+# 1. Load Packages
+############################################################
 
 library(tidyverse)
 
 
 
 ############################################################
-# 2. Import the Dataset
+# 2. Import Dataset
 ############################################################
 
-# Load the Mall Customers dataset
 data <- read.csv("Mall_Customers.csv")
 
-# View the first few rows
 head(data)
-
-# Inspect the structure
 str(data)
 
-# Rename variables to simpler names for easier coding
-names(data) <- c("customer_id", "gender", "age", "income", "spending_score")
 
-# Check updated variable names
+
+############################################################
+# 3. Rename Variables for Easier Coding
+############################################################
+
+names(data) <- c("customer_id",
+                 "gender",
+                 "age",
+                 "income",
+                 "spending_score")
+
 names(data)
 
 
 
 ############################################################
-# 3. Basic Data Preparation
+# 4. Basic Data Preparation
 ############################################################
 
-# Convert gender to a categorical variable
+# Convert gender to categorical variable
 data$gender <- as.factor(data$gender)
 
-# Remove missing values if any
-data <- na.omit(data)
+# Check for missing values
+colSums(is.na(data))
 
-# Confirm dataset structure after cleaning
-str(data)
-
-# View summary statistics
 summary(data)
 
 
 
 ############################################################
-# 4. Behavioral Data Exploration
+# 5. Behavioral Data Exploration
 ############################################################
 
-# In this dataset, spending_score is the main behavioral variable.
-# We can begin by exploring how it differs across customers.
+# Spending score is the main behavioral indicator
 
-# Distribution of spending score
+# Distribution of spending behavior
 hist(data$spending_score,
-     main = "Distribution of Spending Score",
+     main = "Distribution of Customer Spending Score",
      xlab = "Spending Score",
-     col = "lightblue",
-     border = "white")
+     col = "lightblue")
 
-# Compare spending score by gender
+# Compare spending by gender
 ggplot(data, aes(x = gender, y = spending_score)) +
   geom_boxplot() +
-  labs(title = "Spending Score by Gender",
-       x = "Gender",
-       y = "Spending Score")
+  labs(title = "Customer Spending Score by Gender")
 
-# Explore income and spending behavior
+# Relationship between income and spending behavior
 ggplot(data, aes(x = income, y = spending_score)) +
-  geom_point(alpha = 0.7) +
-  labs(title = "Income and Spending Behavior",
-       x = "Annual Income (k$)",
+  geom_point(alpha = .7) +
+  labs(title = "Income vs Spending Score",
+       x = "Annual Income",
        y = "Spending Score")
 
-# Explore age and spending behavior
+# Relationship between age and spending behavior
 ggplot(data, aes(x = age, y = spending_score)) +
-  geom_point(alpha = 0.7) +
-  labs(title = "Age and Spending Behavior",
-       x = "Age",
-       y = "Spending Score")
+  geom_point(alpha = .7) +
+  labs(title = "Age vs Spending Score")
 
 
 
 ############################################################
-# 5. Customer Heterogeneity
+# 6. Customer Heterogeneity
 ############################################################
 
-# Customer heterogeneity means that customers differ
-# from one another in meaningful ways.
+# Customers are not identical. We explore how they differ.
 
-# Create age groups to examine differences across segments
+# Create age groups
 data <- data %>%
   mutate(age_group = case_when(
     age < 30 ~ "Under 30",
@@ -125,43 +114,27 @@ data$age_group <- as.factor(data$age_group)
 data %>%
   group_by(age_group) %>%
   summarize(
-    avg_spending_score = mean(spending_score),
+    avg_spending = mean(spending_score),
     avg_income = mean(income),
-    customer_count = n()
+    customers = n()
   )
 
-# Visualize spending score by age group
+# Visualize spending differences
 ggplot(data, aes(x = age_group, y = spending_score)) +
   geom_boxplot() +
-  labs(title = "Spending Score by Age Group",
-       x = "Age Group",
-       y = "Spending Score")
-
-# Compare average spending by gender
-data %>%
-  group_by(gender) %>%
-  summarize(
-    avg_spending_score = mean(spending_score),
-    avg_income = mean(income),
-    avg_age = mean(age),
-    customer_count = n()
-  )
+  labs(title = "Spending Score by Age Group")
 
 
 
 ############################################################
-# 6. STP Framework: Segmentation, Targeting, Positioning
+# 7. STP Framework
 ############################################################
 
-# STP stands for:
-# S = Segmentation
-# T = Targeting
-# P = Positioning
+# STP = Segmentation, Targeting, Positioning
 
-# In analytics, segmentation begins by identifying groups
-# of customers who differ in characteristics or behavior.
+# Step 1: Identify potential segments in the data
 
-# Example 1: Create simple spending categories
+# Create simple spending categories
 data <- data %>%
   mutate(spending_group = case_when(
     spending_score < 34 ~ "Low Spending",
@@ -171,136 +144,90 @@ data <- data %>%
 
 data$spending_group <- as.factor(data$spending_group)
 
-# Examine customer counts across spending groups
+# Examine number of customers in each group
 table(data$spending_group)
 
-# Compare average income and age across spending groups
+# Compare customer characteristics
 data %>%
   group_by(spending_group) %>%
   summarize(
     avg_age = mean(age),
     avg_income = mean(income),
-    customer_count = n()
+    customers = n()
   )
 
-# Visualize income across spending groups
+# Visualization
 ggplot(data, aes(x = spending_group, y = income)) +
   geom_boxplot() +
-  labs(title = "Income by Spending Group",
-       x = "Spending Group",
-       y = "Annual Income (k$)")
-
-# Visualize age across spending groups
-ggplot(data, aes(x = spending_group, y = age)) +
-  geom_boxplot() +
-  labs(title = "Age by Spending Group",
-       x = "Spending Group",
-       y = "Age")
-
-
-# Interpretation idea:
-# These groups are not final market segments yet,
-# but they help us think about which customers may be
-# more attractive to target and how a firm might position
-# offerings differently for them.
+  labs(title = "Income by Spending Group")
 
 
 
 ############################################################
-# 7. Preparing Data for Segmentation
+# 8. Preparing Data for Segmentation
 ############################################################
 
-# Before segmentation, we typically:
-# 1. Select relevant variables
-# 2. Remove non-useful identifiers
-# 3. Standardize numeric variables so they are on the same scale
+# For segmentation we usually:
+# 1. Remove ID variables
+# 2. Select numeric variables
+# 3. Scale the variables
 
-# Select variables useful for segmentation
 segmentation_data <- data %>%
   select(age, income, spending_score)
 
-# View selected data
 head(segmentation_data)
 
-# Check summary statistics
 summary(segmentation_data)
 
-# Scale variables
-segmentation_scaled <- scale(segmentation_data)
 
-# View first few rows of scaled data
-head(segmentation_scaled)
 
-# Check the mean and standard deviation after scaling
-apply(segmentation_scaled, 2, mean)
-apply(segmentation_scaled, 2, sd)
+############################################################
+# 9. Scale Variables
+############################################################
+
+scaled_data <- scale(segmentation_data)
+
+head(scaled_data)
+
+# Check scaling results
+apply(scaled_data, 2, mean)
+apply(scaled_data, 2, sd)
 
 
 
 ############################################################
-# 8. Visualizing Variables for Segmentation Readiness
+# 10. Visualizing Variables for Segmentation
 ############################################################
 
-# Pairwise scatterplots help us see possible groupings
+# Scatterplots help reveal possible customer groups
+
 pairs(segmentation_data,
-      main = "Scatterplot Matrix for Segmentation Variables")
+      main = "Customer Segmentation Variables")
 
-# Scatterplot: income vs spending score
 ggplot(data, aes(x = income, y = spending_score)) +
-  geom_point(alpha = 0.7) +
-  labs(title = "Income vs Spending Score",
-       x = "Annual Income (k$)",
-       y = "Spending Score")
-
-# Scatterplot: age vs income
-ggplot(data, aes(x = age, y = income)) +
-  geom_point(alpha = 0.7) +
-  labs(title = "Age vs Income",
-       x = "Age",
-       y = "Annual Income (k$)")
-
-# Scatterplot: age vs spending score
-ggplot(data, aes(x = age, y = spending_score)) +
-  geom_point(alpha = 0.7) +
-  labs(title = "Age vs Spending Score",
-       x = "Age",
-       y = "Spending Score")
+  geom_point() +
+  labs(title = "Income vs Spending Score")
 
 
 
 ############################################################
-# 9. Optional: Save Segmentation Dataset for Next Week
+# 11. Save Dataset for Next Week
 ############################################################
 
-# Convert scaled data to a data frame for saving
-segmentation_scaled_df <- as.data.frame(segmentation_scaled)
+scaled_df <- as.data.frame(scaled_data)
 
-# Save if needed
-# write.csv(segmentation_scaled_df,
-#           "mall_customers_segmentation_scaled.csv",
+# write.csv(scaled_df,
+#           "mall_customers_scaled.csv",
 #           row.names = FALSE)
-
-
-
-############################################################
-# 10. Final Notes for Students
-############################################################
-
-# Key takeaway:
-# Week 4 focuses on understanding that customers differ
-# in their characteristics and behaviors. These differences
-# form the basis of market segmentation. In the next step,
-# we will use clustering methods to identify customer groups
-# more formally using data-driven techniques.
 
 
 
 ############################################################
 # End of Week 4 Script
 #
-# Students should now be able to:
-# - Explore behavioral differences in customer data
-# - Recognize customer heterogeneity
-# - Connect data analysis to the STP framework
-# - Prepare variables for segmentation analysis
+# Students should now understand:
+# - Behavioral differences among customers
+# - Customer heterogeneity
+# - How STP relates to data
+# - How to prepare variables for segmentation
 ############################################################
