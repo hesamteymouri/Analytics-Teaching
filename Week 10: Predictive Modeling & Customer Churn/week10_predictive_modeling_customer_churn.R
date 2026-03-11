@@ -1,6 +1,6 @@
 ############################################################
 # Marketing Analytics
-# Week 8: Predictive Modeling & Customer Churn
+# Week 10: Predictive Modeling & Customer Churn
 #
 # Purpose of this script:
 # This script introduces predictive analytics using a
@@ -281,7 +281,7 @@ ggplot(test_results, aes(x = predicted_probability)) +
 
 
 ############################################################
-# End of Week 8 Script
+# End of Week 10 Script
 #
 # Students should now be able to:
 # - Understand the idea of predictive analytics
