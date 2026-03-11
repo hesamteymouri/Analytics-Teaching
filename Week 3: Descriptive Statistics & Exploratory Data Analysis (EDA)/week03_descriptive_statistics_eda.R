@@ -32,10 +32,8 @@ library(corrplot)
 # 2. Import the Dataset
 ############################################################
 
-# Load the Week 2 cleaned or messy dataset
-# If using the messy dataset, students may first need to clean it
-
-data <- read.csv("retail_customers_week2_messy.csv")
+# Load the Mall Customers dataset
+data <- read.csv("Mall_Customers.csv")
 
 # View the first few rows
 head(data)
@@ -43,28 +41,26 @@ head(data)
 # Inspect the structure
 str(data)
 
+# Rename columns to make them easier to use in R
+names(data) <- c("customer_id", "gender", "age", "income", "spending_score")
+
+# Check updated column names
+names(data)
+
 
 
 ############################################################
 # 3. Basic Data Preparation for EDA
 ############################################################
 
-# Convert categorical variables to factors
+# Convert gender to a categorical variable (factor)
 data$gender <- as.factor(data$gender)
-data$region <- as.factor(data$region)
-data$loyalty_member <- as.factor(data$loyalty_member)
 
-# Remove rows with missing values for this week's analysis
-# (In practice, other missing-data approaches are possible)
+# Check for missing values
+colSums(is.na(data))
+
+# Remove rows with missing values if any exist
 data <- na.omit(data)
-
-# Remove impossible values
-data <- data %>%
-  filter(age > 0,
-         income > 0)
-
-# Create a useful derived variable
-data$total_purchases <- data$online_purchases + data$store_purchases
 
 # View the cleaned data
 head(data)
@@ -78,27 +74,25 @@ head(data)
 # Overall summary of all variables
 summary(data)
 
-# Mean spending
-mean(data$total_spending)
+# Mean spending score
+mean(data$spending_score)
 
-# Median spending
-median(data$total_spending)
+# Median spending score
+median(data$spending_score)
 
-# Standard deviation of spending
-sd(data$total_spending)
+# Standard deviation of spending score
+sd(data$spending_score)
 
-# Minimum and maximum spending
-min(data$total_spending)
-max(data$total_spending)
+# Minimum and maximum spending score
+min(data$spending_score)
+max(data$spending_score)
 
 # Summary statistics for selected numeric variables
 data %>%
   summarize(
     avg_age = mean(age),
     avg_income = mean(income),
-    avg_spending = mean(total_spending),
-    avg_visits = mean(visits_last_month),
-    avg_total_purchases = mean(total_purchases)
+    avg_spending_score = mean(spending_score)
   )
 
 
@@ -110,14 +104,8 @@ data %>%
 # Frequency count for gender
 table(data$gender)
 
-# Frequency count for region
-table(data$region)
-
-# Frequency count for loyalty membership
-table(data$loyalty_member)
-
-# Proportions
-prop.table(table(data$loyalty_member))
+# Proportions for gender
+prop.table(table(data$gender))
 
 
 
@@ -125,10 +113,10 @@ prop.table(table(data$loyalty_member))
 # 6. Distribution Analysis
 ############################################################
 
-# Histogram of total spending
-hist(data$total_spending,
-     main = "Distribution of Total Spending",
-     xlab = "Total Spending",
+# Histogram of spending score
+hist(data$spending_score,
+     main = "Distribution of Spending Score",
+     xlab = "Spending Score",
      col = "lightblue",
      border = "white")
 
@@ -139,16 +127,23 @@ hist(data$age,
      col = "lightgreen",
      border = "white")
 
+# Histogram of income
+hist(data$income,
+     main = "Distribution of Annual Income",
+     xlab = "Annual Income (k$)",
+     col = "lightpink",
+     border = "white")
+
 # Boxplot of income
 boxplot(data$income,
-        main = "Boxplot of Income",
-        ylab = "Income",
+        main = "Boxplot of Annual Income",
+        ylab = "Annual Income (k$)",
         col = "lightgray")
 
-# Boxplot of spending
-boxplot(data$total_spending,
-        main = "Boxplot of Total Spending",
-        ylab = "Total Spending",
+# Boxplot of spending score
+boxplot(data$spending_score,
+        main = "Boxplot of Spending Score",
+        ylab = "Spending Score",
         col = "orange")
 
 
@@ -159,9 +154,7 @@ boxplot(data$total_spending,
 
 # Select numeric variables only
 numeric_data <- data %>%
-  select(age, income, visits_last_month,
-         online_purchases, store_purchases,
-         total_spending, total_purchases)
+  select(age, income, spending_score)
 
 # Correlation matrix
 cor_matrix <- cor(numeric_data)
@@ -178,39 +171,46 @@ corrplot(cor_matrix, method = "circle", type = "upper")
 # 8. Data Visualization with ggplot2
 ############################################################
 
-# Scatterplot: Age vs Total Spending
-ggplot(data, aes(x = age, y = total_spending)) +
+# Scatterplot: Age vs Spending Score
+ggplot(data, aes(x = age, y = spending_score)) +
   geom_point(alpha = 0.6) +
-  labs(title = "Customer Age vs Total Spending",
+  labs(title = "Customer Age vs Spending Score",
        x = "Age",
-       y = "Total Spending")
+       y = "Spending Score")
 
-# Scatterplot: Income vs Total Spending
-ggplot(data, aes(x = income, y = total_spending)) +
+# Scatterplot: Income vs Spending Score
+ggplot(data, aes(x = income, y = spending_score)) +
   geom_point(alpha = 0.6) +
-  labs(title = "Income vs Total Spending",
-       x = "Income",
-       y = "Total Spending")
+  labs(title = "Annual Income vs Spending Score",
+       x = "Annual Income (k$)",
+       y = "Spending Score")
 
-# Boxplot: Spending by Loyalty Membership
-ggplot(data, aes(x = loyalty_member, y = total_spending)) +
-  geom_boxplot() +
-  labs(title = "Total Spending by Loyalty Membership",
-       x = "Loyalty Member",
-       y = "Total Spending")
+# Scatterplot: Age vs Income
+ggplot(data, aes(x = age, y = income)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Customer Age vs Annual Income",
+       x = "Age",
+       y = "Annual Income (k$)")
 
-# Boxplot: Spending by Gender
-ggplot(data, aes(x = gender, y = total_spending)) +
+# Boxplot: Spending Score by Gender
+ggplot(data, aes(x = gender, y = spending_score)) +
   geom_boxplot() +
-  labs(title = "Total Spending by Gender",
+  labs(title = "Spending Score by Gender",
        x = "Gender",
-       y = "Total Spending")
+       y = "Spending Score")
 
-# Bar chart: Number of Customers by Region
-ggplot(data, aes(x = region)) +
+# Boxplot: Income by Gender
+ggplot(data, aes(x = gender, y = income)) +
+  geom_boxplot() +
+  labs(title = "Annual Income by Gender",
+       x = "Gender",
+       y = "Annual Income (k$)")
+
+# Bar chart: Number of Customers by Gender
+ggplot(data, aes(x = gender)) +
   geom_bar() +
-  labs(title = "Customer Count by Region",
-       x = "Region",
+  labs(title = "Customer Count by Gender",
+       x = "Gender",
        y = "Count")
 
 
@@ -219,26 +219,15 @@ ggplot(data, aes(x = region)) +
 # 9. Grouped Summaries to Identify Patterns
 ############################################################
 
-# Average spending by loyalty membership
-data %>%
-  group_by(loyalty_member) %>%
-  summarize(avg_spending = mean(total_spending),
-            avg_income = mean(income),
-            avg_purchases = mean(total_purchases))
-
-# Average spending by gender
+# Average spending score by gender
 data %>%
   group_by(gender) %>%
-  summarize(avg_spending = mean(total_spending),
-            avg_income = mean(income),
-            avg_visits = mean(visits_last_month))
-
-# Average spending by region
-data %>%
-  group_by(region) %>%
-  summarize(avg_spending = mean(total_spending),
-            avg_income = mean(income),
-            customer_count = n())
+  summarize(
+    avg_spending_score = mean(spending_score),
+    avg_income = mean(income),
+    avg_age = mean(age),
+    customer_count = n()
+  )
 
 
 
@@ -247,12 +236,12 @@ data %>%
 ############################################################
 
 # Example interpretation questions:
-# - Do loyalty members spend more on average?
-# - Is spending related to income?
-# - Are some regions associated with higher average spending?
-# - Are there possible outliers in income or spending?
+# - Do male and female customers differ in spending score?
+# - Is spending score related to annual income?
+# - Are younger customers associated with higher spending scores?
+# - Are there possible outliers in income or spending score?
 
-# Compare spending across age groups
+# Create age groups
 data <- data %>%
   mutate(age_group = case_when(
     age < 30 ~ "Under 30",
@@ -261,20 +250,24 @@ data <- data %>%
     age >= 60 ~ "60+"
   ))
 
+# Convert age_group to factor
 data$age_group <- as.factor(data$age_group)
 
+# Summary by age group
 data %>%
   group_by(age_group) %>%
-  summarize(avg_spending = mean(total_spending),
-            avg_income = mean(income),
-            count = n())
+  summarize(
+    avg_spending_score = mean(spending_score),
+    avg_income = mean(income),
+    count = n()
+  )
 
-# Visualization of spending by age group
-ggplot(data, aes(x = age_group, y = total_spending)) +
+# Visualization of spending score by age group
+ggplot(data, aes(x = age_group, y = spending_score)) +
   geom_boxplot() +
-  labs(title = "Total Spending by Age Group",
+  labs(title = "Spending Score by Age Group",
        x = "Age Group",
-       y = "Total Spending")
+       y = "Spending Score")
 
 
 
@@ -282,7 +275,7 @@ ggplot(data, aes(x = age_group, y = total_spending)) +
 # 11. Optional: Save a Cleaned Version of the Dataset
 ############################################################
 
-# write.csv(data, "retail_customers_week3_cleaned.csv", row.names = FALSE)
+# write.csv(data, "mall_customers_week3_cleaned.csv", row.names = FALSE)
 
 
 
