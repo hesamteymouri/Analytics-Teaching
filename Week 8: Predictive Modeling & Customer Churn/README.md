@@ -8,18 +8,21 @@ Variables in the Dataset
 
 Some of the key variables used in this analysis include:
 
-Variable	Description
-customerID	Unique customer identifier
-gender	Customer gender
-SeniorCitizen	Indicates whether the customer is a senior citizen
-tenure	Number of months the customer has stayed with the company
-PhoneService	Whether the customer has phone service
-InternetService	Type of internet service (DSL, Fiber optic, None)
-Contract	Contract type (Month-to-month, One year, Two year)
-MonthlyCharges	Monthly bill amount
-TotalCharges	Total charges accumulated by the customer
-PaymentMethod	Customer payment method
-Churn	Whether the customer left the company (Yes / No)
+Variable: Description
+
+customerID:	Unique customer identifier
+gender:	Customer gender
+SeniorCitizen:	Indicates whether the customer is a senior citizen
+tenure:	Number of months the customer has stayed with the company
+PhoneService:	Whether the customer has phone service
+InternetService:	Type of internet service (DSL, Fiber optic, None)
+Contract:	Contract type (Month-to-month, One year, Two year)
+MonthlyCharges:	Monthly bill amount
+TotalCharges:	Total charges accumulated by the customer
+PaymentMethod:	Customer payment method
+Churn:	Whether the customer left the company (Yes / No)
+
+
 Purpose of the Dataset
 
 Customer churn prediction is a common problem in marketing analytics and customer relationship management. Firms aim to identify customers who are likely to leave so they can take actions to improve retention.
