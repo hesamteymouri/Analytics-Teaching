@@ -1,163 +1,184 @@
 ############################################################
-# Customer Segmentation with Normalization, NbClust, and K-Means
-# This script:
-# 1. Reads customer segmentation data
-# 2. Standardizes / normalizes the variables
-# 3. Uses NbClust to help choose the number of clusters
-# 4. Runs K-means clustering
-# 5. Examines cluster output
-# 6. Visualizes clusters and the elbow plot
+# K-Means Clustering in R
+# Customer / Market Segmentation Example
 ############################################################
 
-# Load the tidyverse package for data handling
+############################
+# 1. Install and load packages
+############################
+
+# Install packages only if needed
+# install.packages("tidyverse")
+# install.packages("factoextra")
+
 library(tidyverse)
+library(factoextra)
 
-# Set the working directory to the folder where your data file is stored
-# Change this path to the location on your own computer
-setwd("C:/Users/....")
+############################
+# 2. Set working directory
+############################
 
-# Read the segmentation dataset
+# Change this path to the folder where your data file is stored
+setwd("C:/Users/gduman/OneDrive - University of New Haven/Desktop/UNH/MKTG6640_4450/Fall2023/week6")
+
+############################
+# 3. Read the data
+############################
+
+# Read the CSV file
 # header = TRUE means the first row contains variable names
-# sep = "," tells R the file is comma-separated
 seg_data <- read.csv("SegmentationData.csv", header = TRUE, sep = ",")
 
-# Inspect the first few rows of the dataset
+# Inspect the first few rows
 head(seg_data)
 
-# Check the structure of the dataset
-# This helps confirm which columns are numeric and usable for clustering
+# Check the structure of the data
 str(seg_data)
 
-############################################################
-# Step 1: Standardize the clustering variables
-############################################################
+############################
+# 4. Select variables for clustering
+############################
 
-# We standardize columns 2 through 7 so that all variables are on the same scale
-# scale() converts each variable to z-scores:
-# mean = 0 and standard deviation = 1
-# This is useful when variables are measured in different units
-std_seg_data <- scale(seg_data[, 2:7])
+# We use columns 2 through 7 for clustering
+# Usually column 1 contains an ID and should not be included
+cluster_data <- seg_data[, 2:7]
 
-# If needed, you can read the help file for scale()
-?scale
+############################
+# 5. Standardize or normalize the data
+############################
 
-############################################################
-# Step 2: Use NbClust to explore the appropriate number of clusters
-############################################################
+# Option A: Z-score standardization
+# This makes each variable have mean 0 and standard deviation 1
+std_seg_data <- scale(cluster_data)
 
-# Install NbClust once if it is not already installed
-# install.packages("NbClust")
-
-# Load the package
-library(NbClust)
-
-# If needed, open the help page
-?NbClust
-
-# NbClust compares different clustering solutions and suggests
-# how many clusters may be appropriate.
-# min.nc = minimum number of clusters to test
-# max.nc = maximum number of clusters to test
-# method = "ward.D2" uses Ward's hierarchical clustering method
-NbClust(data = std_seg_data, min.nc = 2, max.nc = 15, method = "ward.D2")
-
-# Examine correlations among the standardized variables
-# Highly correlated variables may influence clustering results
-cor(std_seg_data)
-
-# Optional alternative:
-# Using absolute values can sometimes be explored, but this is not standard practice
-# NbClust(data = abs(std_seg_data), min.nc = 2, max.nc = 15, method = "ward.D2")
-
-############################################################
-# Step 3: Create a min-max normalized version of the data
-############################################################
-
-# This custom function rescales each variable to a 0-1 range
-# Formula:
-# (x - minimum) / (maximum - minimum)
-# This is another common approach when preparing data for clustering
+# Option B: Min-max normalization
+# This rescales each variable to a 0-1 range
 func_normalize <- function(x) {
   return((x - min(x)) / (max(x) - min(x)))
 }
 
-# Apply the normalization function to columns 2 through 7
-std_seg_data2 <- as.data.frame(lapply(seg_data[, 2:7], func_normalize))
+norm_seg_data <- as.data.frame(lapply(cluster_data, func_normalize))
 
-# View the normalized data
-View(std_seg_data2)
+# View normalized data
+View(norm_seg_data)
 
-# Run NbClust again using the normalized data
-# This lets us compare whether the recommended number of clusters
-# is similar across preprocessing methods
-NbClust(data = std_seg_data2, min.nc = 2, max.nc = 15, method = "ward.D2")
+############################
+# 6. Determine the number of clusters
+############################
 
-############################################################
-# Step 4: K-Means Clustering
-############################################################
+# Elbow method:
+# This helps evaluate how many clusters may be appropriate
+fviz_nbclust(norm_seg_data, kmeans, method = "wss", k.max = 15) +
+  ggtitle("Elbow Method for Choosing Number of Clusters")
 
-# Re-read the original dataset if needed
-# (Not strictly necessary here, since seg_data is already loaded,
-# but included in case the script is run in sections)
-seg_data <- read.csv("SegmentationData.csv", header = TRUE, sep = ",")
+# Optional:
+# You can also use silhouette method
+fviz_nbclust(norm_seg_data, kmeans, method = "silhouette", k.max = 15) +
+  ggtitle("Silhouette Method for Choosing Number of Clusters")
+
+############################
+# 7. Run K-means clustering
+############################
 
 # Set a seed so results are reproducible
-# K-means starts with random initial cluster centers,
-# so setting a seed helps ensure the same results each time
 set.seed(42)
 
-# Open help for kmeans if needed
-?kmeans
+# Run K-means with 3 clusters
+# centers = number of clusters
+# nstart = number of random initial configurations
+# iter.max = maximum number of iterations
+km <- kmeans(norm_seg_data, centers = 3, nstart = 25, iter.max = 100)
 
-# Run K-means clustering with 3 clusters
-# std_seg_data2 is the normalized dataset
-# 3 = chosen number of clusters
-# iter.max = maximum number of iterations allowed
-km <- kmeans(std_seg_data2, 3, iter.max = 100)
+############################
+# 8. Examine K-means results
+############################
 
-############################################################
-# Step 5: Examine K-means output
-############################################################
-
-# Cluster membership:
-# Shows which cluster each observation belongs to
+# Cluster membership for each observation
 km$cluster
 
-# Cluster centroids:
-# Shows the average profile of each cluster across the variables
+# Add cluster assignments to the original dataset
+seg_data$cluster_km <- km$cluster
+
+# Centroids (average profile of each cluster)
 km$centers
 
-# Within-cluster sum of squares:
-# Measures how tightly grouped the observations are within each cluster
-# Lower values generally indicate more compact clusters
+# Within-cluster sum of squares
 km$withinss
 
-# Cluster size:
-# Number of observations in each cluster
+# Total within-cluster sum of squares
+km$tot.withinss
+
+# Between-cluster sum of squares
+km$betweenss
+
+# Cluster sizes
 km$size
 
-############################################################
-# Step 6: Visualize the cluster solution
-############################################################
+# View first few rows with cluster labels
+head(seg_data)
 
-# Install factoextra once if needed
-# install.packages("factoextra")
+############################
+# 9. Summarize cluster profiles
+############################
 
-# Load factoextra for cluster visualization
-library(factoextra)
+# Compute mean values for each variable by cluster
+cluster_summary <- seg_data %>%
+  group_by(cluster_km) %>%
+  summarise(across(2:7, mean, na.rm = TRUE))
 
-# Visualize the K-means clusters
-# This plot helps show how distinct the clusters are
-# palette = "rgb" controls the color scheme
-fviz_cluster(km, data = std_seg_data2, palette = "rgb")
+print(cluster_summary)
 
-# Open help for fviz_nbclust if needed
-?fviz_nbclust
+############################
+# 10. Visualize K-means clusters
+############################
 
-# Create an elbow plot using the within-cluster sum of squares (WSS)
-# This helps evaluate how many clusters may be appropriate
-# k.max = maximum number of clusters to test
-fviz_nbclust(std_seg_data2, kmeans, method = "wss", k.max = 20)
+# Basic cluster visualization
+fviz_cluster(
+  km,
+  data = norm_seg_data,
+  palette = "jco",
+  ggtheme = theme_minimal(),
+  main = "K-Means Cluster Visualization"
+)
+
+# Improved cluster plot with convex hulls
+fviz_cluster(
+  km,
+  data = norm_seg_data,
+  ellipse.type = "convex",
+  palette = "jco",
+  ggtheme = theme_minimal(),
+  main = "K-Means Clusters with Cluster Boundaries"
+)
+
+############################
+# 11. Visualize cluster sizes
+############################
+
+# Frequency table of cluster membership
+table(seg_data$cluster_km)
+
+# Bar chart of cluster sizes
+seg_data %>%
+  count(cluster_km) %>%
+  ggplot(aes(x = factor(cluster_km), y = n)) +
+  geom_col() +
+  labs(
+    title = "Cluster Sizes",
+    x = "Cluster",
+    y = "Number of Observations"
+  ) +
+  theme_minimal()
+
+############################
+# 12. Optional: Export results
+############################
+
+# Save clustered dataset
+write.csv(seg_data, "SegmentationData_with_KMeans_Clusters.csv", row.names = FALSE)
+
+# Save cluster summary
+write.csv(cluster_summary, "KMeans_Cluster_Summary.csv", row.names = FALSE)
 
 ############################################################
 # End of script
