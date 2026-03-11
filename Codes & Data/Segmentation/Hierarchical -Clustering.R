@@ -1,63 +1,62 @@
-library(tidyverse)
-setwd("C:/Users/gduman/OneDrive - University of New Haven/Desktop/UNH/MKTG6640_4450/Fall2023/week6")
+############################################################
+# Hierarchical Clustering
+############################################################
 
-seg_data<-read.csv("SegmentationData.csv", header=TRUE, sep=",")
+# Step 1: Compute distance matrix
+# Euclidean distance is commonly used in clustering
+dist_matrix <- dist(std_seg_data2)
 
-std_seg_data<-scale(seg_data[, 2:7])
+############################################################
+# Step 2: Perform hierarchical clustering
+############################################################
 
-#install.packages("Nbclust")
-library(NbClust)
+# Ward's method minimizes within-cluster variance
+hc <- hclust(dist_matrix, method = "ward.D2")
 
-install.packages("NbClust")
-library(NbClust)
-?NbClust()
+############################################################
+# Step 3: Plot the dendrogram
+############################################################
 
-std_seg_data<-scale(seg_data[,2:7])
-?scale()
+# Dendrogram shows how observations merge into clusters
 
-NbClust(data=std_seg_data, min.nc = 2, max.nc = 15, method = "ward.D2")
+plot(hc,
+     main = "Hierarchical Clustering Dendrogram",
+     xlab = "Customers",
+     ylab = "Distance",
+     cex = 0.6)
 
-cor(std_seg_data)
+############################################################
+# Step 4: Highlight clusters on the dendrogram
+############################################################
 
-#NbClust(data=abs(std_seg_data), min.nc = 2, max.nc = 15, method = "ward.D2")
+# rect.hclust draws rectangles around clusters
+rect.hclust(hc, k = 3, border = "red")
 
+############################################################
+# Step 5: Assign cluster membership
+############################################################
 
-#create our own normalization function
-func_normalize<-function(x){return((x-min(x))/(max(x)-min(x)))}
+clusters_hc <- cutree(hc, k = 3)
 
-std_seg_data2<-as.data.frame(lapply(seg_data[,2:7], func_normalize))
-view(std_seg_data2)
+# Add cluster labels to original dataset
+seg_data$cluster_hc <- clusters_hc
 
-NbClust(data=std_seg_data2, min.nc = 2, max.nc = 15, method = "ward.D2")
+############################################################
+# Step 6: Check cluster sizes
+############################################################
 
+table(seg_data$cluster_hc)
 
-####K-Means Clustering####
-seg_data<-read.csv("SegmentationData.csv", header=TRUE, sep=",")
-set.seed(42)
-?kmeans()
+############################################################
+# Step 7: Visualize clusters using factoextra
+############################################################
 
-km<-kmeans(std_seg_data2, 3, iter.max=100)
-
-#cluster membership
-km$cluster
-
-#centroids
-km$centers
-
-#within-cluster sum squares
-km$withinss
-
-#cluster size
-km$size
-
-
-#install.packages("factoextra")
+# install.packages("factoextra")
 library(factoextra)
 
-#screeplot
-fviz_cluster(km, data=std_seg_data2, palette="rgb")
-?fviz_nbclust()
-fviz_nbclust(std_seg_data2, kmeans, method="wss", k.max=20)
-
-
-
+fviz_cluster(
+  list(data = std_seg_data2, cluster = clusters_hc),
+  geom = "point",
+  palette = "rgb",
+  main = "Hierarchical Clustering Visualization"
+)
