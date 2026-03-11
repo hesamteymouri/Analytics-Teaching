@@ -1,6 +1,6 @@
 ############################################################
 # Marketing Analytics
-# Week 9: Choice Modeling & Marketing Experiments
+# Week 11: Choice Modeling & Marketing Experiments
 #
 # Purpose of this script:
 # This script introduces:
@@ -284,7 +284,7 @@ prop.test(x = c(sum(experiment$conversion[experiment$group == "A"]),
 
 
 ############################################################
-# End of Week 9 Script
+# End of Week 11 Script
 #
 # Students should now be able to:
 # - Understand what a true choice dataset looks like
