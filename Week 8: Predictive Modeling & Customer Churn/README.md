@@ -10,9 +10,9 @@ Some of the key variables used in this analysis include:
 
 Variable: Description
 
-#customerID:	Unique customer identifier
-#gender:	Customer gender
-#SeniorCitizen:	Indicates whether the customer is a senior citizen
+#customerID:	Unique customer identifier#
+#gender:	Customer gender#
+#SeniorCitizen:	Indicates whether the customer is a senior citizen#
 #tenure:	Number of months the customer has stayed with the company
 #PhoneService:	Whether the customer has phone service
 #InternetService:	Type of internet service (DSL, Fiber optic, None)
