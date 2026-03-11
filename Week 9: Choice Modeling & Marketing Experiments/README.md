@@ -81,20 +81,6 @@ In this week's materials, the dataset is used to demonstrate:
 
 Students will first estimate a **choice model** explaining transportation decisions and then conduct a **simulated A/B experiment** to test marketing strategies.
 
-## Dataset Source
-
-Travel Mode Choice Dataset  
-Source: Applied Econometrics with R (AER) package
-
-Dataset repository:
-https://vincentarelbundock.github.io/Rdatasets/csv/AER/TravelMode.csv
-
-Documentation:
-https://vincentarelbundock.github.io/Rdatasets/doc/AER/TravelMode.html
-
-The dataset is distributed through the Rdatasets project, which provides
-a curated collection of datasets originally included in many R packages.
-
 
 ## Note for Students
 
