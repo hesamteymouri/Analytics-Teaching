@@ -52,7 +52,7 @@ price_range: Target variable indicating phone price category
 The dataset is publicly available on Kaggle:
 
 Mobile Phone Price Dataset  
-https://www.kaggle.com/datasets/heeraldedhia/mobile-phone-price-prediction
+https://www.kaggle.com/datasets/iabhishekofficial/mobile-price-classification
 
 The dataset was originally designed for predictive modeling but is well suited for demonstrating choice modeling concepts and attribute tradeoffs in marketing analytics.
 
@@ -69,13 +69,6 @@ In this week’s materials, the dataset is used to demonstrate:
 Students will first explore how product features relate to price categories and then conduct a simulated experiment to test marketing messages.
 
 
-## Files in This Folder
-
-week09_choice_modeling_ab_testing/
-
-- week09_choice_modeling_ab_testing.R
-- mobile_phone_data.csv
-- README.md
 
 
 ## Note for Students
